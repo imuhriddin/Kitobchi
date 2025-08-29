@@ -7,7 +7,7 @@ function TopBooks() {
 
     return (
         <section className=''>
-            <div className='mx-auto max-w-[1220px] px-5 my-10'>
+            <div className='mx-auto max-w-[1250px] px-5 my-10'>
                 <h1 className='title py-10'>Best seller kitoblar</h1>
                 {isPending && <h2>Loading...</h2>}
                 {error && <h2>{error}</h2>}

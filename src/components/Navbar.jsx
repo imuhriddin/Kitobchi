@@ -3,7 +3,7 @@ import { Link, NavLink } from "react-router"
 function Navbar() {
   return (
     <header className="bg-[#E4E4E7]">
-      <div className="mx-auto max-w-[1220px] px-5 py-3 flex items-center justify-between">
+      <div className="mx-auto max-w-[1250px] px-5 py-3 flex items-center justify-between">
         <Link to={'/'}>
           <h1 className="text-3xl font-bold text-[#1E1B4B]">Kitobchi</h1>
         </Link>
