@@ -1,76 +1,45 @@
-import { Button, Card, Typography } from "@mui/joy";
-import { Rating } from "@mui/material";
 function BookCard({ item }) {
   return (
-    <div>
-      <Card
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-          padding: "10px",
-        //   margin: "10px 10px",
-          borderRadius: "12px",
-          backgroundColor: "#EEF2FF",
-          minHeight: "450px",
-          maxWidth: "450px",
+    <div className="relative flex flex-col items-center bg-white rounded-xl shadow-md p-4 hover:shadow-xl hover:scale-105 transition-transform duration-300 w-52 sm:w-56">
+      {/* Delivery Badge */}
+      <div className="absolute top-2 left-2">
+        <span className="bg-green-100 text-green-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+          Yetkazib berish
+        </span>
+      </div>
 
-          transition: "scale 0.4s",
-          "&:hover": {
-            // transform: "translateY(-4px)",
-            scale: '1.03'
-          },
-          "& > *": { minWidth: "clamp(0px, (360px - 100%) * 999,100%)" },
-          cursor: "pointer",
-        }}
-      >
-        <div className="flex flex-col items-center">
-          <img
-            style={{ maxWidth: "190px", borderRadius: "8px" }}
-            src={item.image}
-            alt=""
-          />
-          <div className="mt-2">
-            <Typography
-              sx={{
-                fontWeight: "700",
-              }}
+      {/* Book Image */}
+      <img
+        src={item.image}
+        alt={item.title}
+        className="w-32 h-44 sm:w-36 sm:h-48 rounded-lg object-cover mb-3 shadow-sm"
+      />
+
+      {/* Title, Author, Price */}
+      <div className="text-center w-full px-1 mb-3">
+        <h3 className="text-sm font-bold text-gray-900 truncate">{item.title}</h3>
+        <p className="text-indigo-600 text-xs mt-0.5 truncate">{item.author}</p>
+        <p className="text-indigo-800 font-semibold mt-1 text-sm">{item.price} so'm</p>
+
+        {/* Rating */}
+        <div className="flex justify-center mt-1">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <svg
+              key={i}
+              className={`w-3 h-3 ${i < Number(String(item.price)[0]) ? 'text-green-500' : 'text-gray-300'}`}
+              fill="currentColor"
+              viewBox="0 0 20 20"
             >
-              {item.title}
-            </Typography>
-            <Typography
-              sx={{
-                color: "#818CF8",
-              }}
-            >
-              {item.author}
-            </Typography>
-            {/* <Typography sx={{ fontSize: "0.9rem" }}>
-              {item.description}
-            </Typography> */}
-            <Typography
-              sx={{
-                fontWeight: "600",
-                fontSize: "1.1rem",
-                color: "#4F46E5",
-                marginTop:'5px'
-              }}
-            >
-              {item.price} so'm
-            </Typography>
-            <Rating
-              sx={{ color: "#84CC16", marginTop: '5px' }}
-              value={Number(String(item.price)[0])}
-              name="read-only"
-              readOnly
-            />
-          </div>
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.96a1 1 0 00.95.69h4.163c.969 0 1.371 1.24.588 1.81l-3.37 2.448a1 1 0 00-.364 1.118l1.286 3.96c.3.921-.755 1.688-1.538 1.118l-3.37-2.448a1 1 0 00-1.175 0l-3.37 2.448c-.783.57-1.838-.197-1.538-1.118l1.286-3.96a1 1 0 00-.364-1.118L2.072 9.387c-.783-.57-.38-1.81.588-1.81h4.163a1 1 0 00.95-.69l1.286-3.96z" />
+            </svg>
+          ))}
         </div>
-        <Button onClick={function () {}} variant="solid">
-          Add to cart
-        </Button>
-      </Card>
+      </div>
+
+      {/* Add to Cart Button */}
+      <button className="w-full bg-indigo-600 text-white font-semibold py-1.5 rounded-lg mt-auto hover:bg-indigo-700 transition-colors text-sm">
+        Add to cart
+      </button>
     </div>
   );
 }
