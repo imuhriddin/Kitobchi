@@ -25,14 +25,14 @@ export default function Home() {
 
             <div class="mt-8 flex gap-4">
               <a
-                 href="/announcement"
+                href="/announcement"
                 class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition"
               >
                 E’lon joylash
               </a>
 
               <a
-                 href="/books"
+                href="/books"
                 class="px-6 py-3 bg-white text-gray-700 border border-gray-300 rounded-xl hover:bg-gray-100 transition"
               >
                 Kitoblarni ko‘rish
