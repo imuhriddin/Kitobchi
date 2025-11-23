@@ -1,6 +1,7 @@
 import Search from "antd/es/input/Search";
 import useFetch from "../hooks/useFetch";
 import BookCard from "../components/BookCard";
+import BooksData from "../api/books.json";
 import {
   KeyboardArrowDownOutlined,
   KeyboardArrowUpOutlined,
@@ -10,9 +11,13 @@ import { useState } from "react";
 
 function Books() {
   const onSearch = (value) => console.log(value);
-  const { data: books, isPending, error } = useFetch(
-    "https://685555ac6a6ef0ed66322ac3.mockapi.io/products"
-  );
+  const books = BooksData;
+
+  // const {
+  //   data: books,
+  //   isPending,
+  //   error,
+  // } = useFetch("https://685555ac6a6ef0ed66322ac3.mockapi.io/products");
 
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [priceOpen, setPriceOpen] = useState(false);
@@ -51,10 +56,8 @@ function Books() {
 
   return (
     <div className="max-w-[1350px] mx-auto px-5 py-10 flex flex-col md:flex-row gap-10">
-
       {/* FILTER SECTION */}
       <div className="md:w-1/4 bg-white/80 backdrop-blur-md shadow-xl rounded-3xl p-6 space-y-7 border border-gray-100">
-
         <h3 className="text-xl font-extrabold text-[#1E1B4B] tracking-tight">
           Filtrni sozlang
         </h3>
@@ -65,7 +68,9 @@ function Books() {
             open: categoriesOpen,
             setOpen: setCategoriesOpen,
             content: categories.map((cat) => (
-              <Checkbox key={cat} className="my-1">{cat}</Checkbox>
+              <Checkbox key={cat} className="my-1">
+                {cat}
+              </Checkbox>
             )),
           },
           {
@@ -115,12 +120,13 @@ function Books() {
             open: publisherOpen,
             setOpen: setPublisherOpen,
             content: publishers.map((pub) => (
-              <Checkbox key={pub} className="my-1">{pub}</Checkbox>
+              <Checkbox key={pub} className="my-1">
+                {pub}
+              </Checkbox>
             )),
           },
         ].map((filter, index) => (
           <div key={index} className="pb-4">
-
             {/* HEADER */}
             <div
               onClick={() => filter.setOpen(!filter.open)}
@@ -155,12 +161,9 @@ function Books() {
                 {filter.content}
               </div>
             </div>
-
           </div>
         ))}
-
       </div>
-
 
       {/* BOOKS SECTION */}
       <div className="md:w-3/4 flex flex-col gap-6">
@@ -179,14 +182,13 @@ function Books() {
             className="max-w-xs w-full mt-3 md:mt-0"
           />
         </div>
-
-        {isPending && <h2>Loading...</h2>}
-        {error && <h2>{error}</h2>}
+        {/* json fayl bulganligi uchun pastdagi 2 qator code yopib turiladi */}
+        {/* {isPending && <h2>Loading...</h2>}
+        {error && <h2>{error}</h2>} */}
 
         {/* BETTER GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8 lg:gap-10 py-4">
-          {books &&
-            books.map((book) => <BookCard key={book.id} item={book} />)}
+          {books && books.map((book) => <BookCard key={book.id} item={book} />)}
         </div>
       </div>
     </div>
