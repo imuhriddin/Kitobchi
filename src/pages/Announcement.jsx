@@ -162,8 +162,8 @@ export default function Announcement() {
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className={`relative flex items-center justify-center px-4 py-3 md:py-3.5 rounded-lg border-2 cursor-pointer transition-all ${formData.type === 'sell'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-gray-300'
                   }`}>
                   <input
                     type="radio"
@@ -178,8 +178,8 @@ export default function Announcement() {
                   </span>
                 </label>
                 <label className={`relative flex items-center justify-center px-4 py-3 md:py-3.5 rounded-lg border-2 cursor-pointer transition-all ${formData.type === 'donate'
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-gray-300'
                   }`}>
                   <input
                     type="radio"
