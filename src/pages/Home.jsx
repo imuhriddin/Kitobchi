@@ -24,19 +24,19 @@ export default function Home() {
             </p>
 
             <div className="mt-8 flex gap-4">
-              <a
-                href="/announcement"
+              <NavLink
+                to="/announcement"
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md transition"
               >
                 E’lon joylash
-              </a>
+              </NavLink>
 
-              <a
-                href="/books"
+              <NavLink
+                to="/books"
                 className="px-6 py-3 bg-white text-gray-700 border border-gray-300 rounded-xl hover:bg-gray-100 transition"
               >
                 Kitoblarni ko‘rish
-              </a>
+              </NavLink>
             </div>
           </div>
 
