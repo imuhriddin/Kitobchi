@@ -4,15 +4,16 @@ import api from "../api/api";
 
 export default function Announcement() {
   const [images, setImages] = useState([]);
+  const [imageUrl, setImageUrl] = useState("");
+  const [imageType, setImageType] = useState("file");
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
     author: "",
     category: "",
-    type: "sell",
+    type: "sell", // sell | donate
     price: "",
-    delivery: false,
   });
 
   const categories = [
@@ -42,10 +43,22 @@ export default function Announcement() {
     files.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImages((prev) => [...prev, reader.result]);
+        setImages((prev) => [...prev, reader.result]); // string
       };
       reader.readAsDataURL(file);
     });
+  };
+
+  const addImageByUrl = () => {
+    if (!imageUrl) return;
+
+    if (images.length >= 2) {
+      alert("Siz faqat 2 ta rasm qo‘shishingiz mumkin");
+      return;
+    }
+
+    setImages((prev) => [...prev, imageUrl]);
+    setImageUrl("");
   };
 
   const removeImage = (index) => {
@@ -59,37 +72,53 @@ export default function Announcement() {
       return;
     }
 
+    if (images.length === 0) {
+      alert("Kamida 1 ta rasm qo‘shing");
+      return;
+    }
+
+    if (formData.type === "sell" && !formData.price) {
+      alert("Narxni kiriting");
+      return;
+    }
+
+    const categoryIndex = categories.indexOf(formData.category);
+    if (categoryIndex === -1) {
+      alert("Kategoriya noto‘g‘ri tanlangan");
+      return;
+    }
+
+    const payload = {
+      title: formData.title,
+      author: formData.author,
+      description: "",
+      images: images,                 // string[]
+      category_id: categoryIndex + 1,
+      language_id: 1,
+      listing_type: formData.type,    // 🔥 sell | donate (kichik harf)
+      price:
+        formData.type === "sell"
+          ? Number(formData.price)
+          : 1,                         // 🔥 donate bo‘lsa ham > 0
+      location: "Tashkent",
+    };
+
     try {
       setLoading(true);
-
-      const payload = {
-        title: formData.title,
-        author: formData.author,
-        description: "", // backend talab qiladi
-        images: images, // base64
-        category_id: categories.indexOf(formData.category) + 1,
-        language_id: 1,
-        listing_type: formData.type,
-        price: formData.type === "sell" ? Number(formData.price) : 0,
-        location: "Tashkent",
-      };
-
-      await api.post("/announcements", payload);
-
+      await api.post("/books", payload);
       alert("Kitob eloningiz muvaffaqiyatli joylandi!");
 
-      // reset
       setFormData({
         title: "",
         author: "",
         category: "",
         type: "sell",
         price: "",
-        delivery: false,
       });
       setImages([]);
+      setImageUrl("");
     } catch (error) {
-      console.error(error);
+      console.error("422 DETAIL:", error.response?.data);
       alert("Xatolik yuz berdi!");
     } finally {
       setLoading(false);
@@ -99,20 +128,10 @@ export default function Announcement() {
   return (
     <div className="min-h-screen bg-gray-50 py-6 md:py-10 lg:py-12">
       <div className="max-w-[1250px] container mx-auto px-6">
-        {/* Header */}
-        <div className="mb-6 md:mb-8 lg:mb-10">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900 mb-2">
-            E'lon joylash
-          </h1>
-          <p className="text-sm md:text-base text-gray-600">
-            Sotish yoki hadya qilish uchun kitobingizni joylang
-          </p>
-        </div>
-
-        {/* Form Container */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 md:p-6 lg:p-8 max-w-3xl">
-          <div className="space-y-5 md:space-y-6">
-            {/* Images */}
+          <div className="space-y-6">
+
+            {/* IMAGES */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 Kitob rasmlari
@@ -136,7 +155,7 @@ export default function Announcement() {
                   </div>
                 ))}
 
-                {images.length < 2 && (
+                {images.length < 2 && imageType === "file" && (
                   <label className="h-40 md:h-48 lg:h-56 border-2 border-dashed rounded-lg flex flex-col items-center justify-center cursor-pointer">
                     <Upload size={24} className="text-gray-400 mb-2" />
                     <span className="text-sm text-gray-500">Rasm yuklash</span>
@@ -150,9 +169,50 @@ export default function Announcement() {
                   </label>
                 )}
               </div>
+
+              {images.length < 2 && (
+                <div className="flex gap-6 mt-3">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={imageType === "file"}
+                      onChange={() => setImageType("file")}
+                    />
+                    Kompyuterdan
+                  </label>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      checked={imageType === "url"}
+                      onChange={() => setImageType("url")}
+                    />
+                    URL orqali
+                  </label>
+                </div>
+              )}
+
+              {images.length < 2 && imageType === "url" && (
+                <div className="flex gap-2 mt-3">
+                  <input
+                    type="text"
+                    placeholder="Rasm URL kiriting"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    className="flex-1 px-3 py-2 border rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={addImageByUrl}
+                    className="px-4 bg-gray-200 rounded-lg hover:bg-gray-300"
+                  >
+                    Qo‘shish
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Title */}
+            {/* TITLE */}
             <input
               type="text"
               placeholder="Kitob nomi"
@@ -163,7 +223,7 @@ export default function Announcement() {
               className="w-full px-4 py-2.5 border rounded-lg"
             />
 
-            {/* Author */}
+            {/* AUTHOR */}
             <input
               type="text"
               placeholder="Muallif"
@@ -174,7 +234,7 @@ export default function Announcement() {
               className="w-full px-4 py-2.5 border rounded-lg"
             />
 
-            {/* Category */}
+            {/* CATEGORY */}
             <select
               value={formData.category}
               onChange={(e) =>
@@ -190,7 +250,7 @@ export default function Announcement() {
               ))}
             </select>
 
-            {/* Type */}
+            {/* TYPE */}
             <div className="grid grid-cols-2 gap-3">
               {["sell", "donate"].map((t) => (
                 <label
@@ -205,12 +265,8 @@ export default function Announcement() {
                     type="radio"
                     value={t}
                     checked={formData.type === t}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        type: e.target.value,
-                        price: t === "donate" ? "0" : "",
-                      })
+                    onChange={() =>
+                      setFormData({ ...formData, type: t })
                     }
                     className="hidden"
                   />
@@ -219,7 +275,7 @@ export default function Announcement() {
               ))}
             </div>
 
-            {/* Price */}
+            {/* PRICE */}
             {formData.type === "sell" && (
               <input
                 type="number"
@@ -232,7 +288,7 @@ export default function Announcement() {
               />
             )}
 
-            {/* Submit */}
+            {/* SUBMIT */}
             <button
               onClick={handleSubmit}
               disabled={loading}
@@ -240,6 +296,7 @@ export default function Announcement() {
             >
               {loading ? "Yuborilmoqda..." : "E'lon joylash"}
             </button>
+
           </div>
         </div>
       </div>

@@ -15,24 +15,33 @@ function Profile() {
     bio: "",
     gender: "",
   });
+
+  const [myListings, setMyListings] = useState([]);
+  const [listingsLoading, setListingsLoading] = useState(true);
+
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [message, setMessage] = useState("");
+
   const navigate = useNavigate();
 
+  // ================== USER INFO ==================
   useEffect(() => {
     async function fetchMe() {
       try {
         const res = await api.get("/users/me", {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         });
+
         setUser(res.data);
         setForm({
           first_name: res.data.first_name || "",
           last_name: res.data.last_name || "",
           email: res.data.email || "",
-          password: "", // parol bo‘sh bo‘ladi, foydalanuvchi kiritadi
+          password: "",
           phone: res.data.phone || "",
           telegram_username: res.data.telegram_username || "",
           avatar_url: res.data.avatar_url || "",
@@ -40,15 +49,39 @@ function Profile() {
           gender: res.data.gender || "",
         });
       } catch (err) {
-        console.log(err);
         localStorage.removeItem("token");
         navigate("/login");
       } finally {
         setLoading(false);
       }
     }
+
     fetchMe();
   }, [navigate]);
+
+  // ================== MY LISTINGS ==================
+  useEffect(() => {
+    async function fetchMyListings() {
+      try {
+        const res = await api.get(
+          "/users/me/listings?page=1&page_size=10",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        setMyListings(res.data.items || res.data);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setListingsLoading(false);
+      }
+    }
+
+    fetchMyListings();
+  }, []);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -59,185 +92,135 @@ function Profile() {
     e.preventDefault();
     setUpdating(true);
     setMessage("");
+
     try {
-      // PUT /users/me endpointiga yangilangan ma'lumotlarni yuboramiz
       await api.put("/users/me", form, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       });
-      setUser({ ...user, ...form }); // display-ni update qilamiz
+
+      setUser({ ...user, ...form });
       setEditing(false);
       setMessage("Profil muvaffaqiyatli yangilandi!");
     } catch (err) {
-      console.log(err);
       setMessage("Yangilashda xatolik yuz berdi.");
     } finally {
       setUpdating(false);
     }
   }
 
-  if (loading) return <div className="text-center mt-20">Yuklanmoqda...</div>;
+  if (loading) {
+    return <div className="text-center mt-20">Yuklanmoqda...</div>;
+  }
 
   return (
-    <div className="mx-auto max-w-[800px] px-5 py-10">
-      <div className="bg-white shadow-xl rounded-2xl p-6 flex flex-col md:flex-row items-center md:items-start gap-6">
+    <div className="mx-auto max-w-[900px] px-5 py-10">
+      {/* ================== PROFILE CARD ================== */}
+      <div className="bg-white shadow-xl rounded-2xl p-6 flex flex-col md:flex-row gap-6">
         {/* Avatar */}
-        <div className="flex-shrink-0">
+        <div>
           {form.avatar_url ? (
             <img
               src={form.avatar_url}
               alt="Avatar"
-              className="w-32 h-32 rounded-full object-cover border border-gray-300"
+              className="w-32 h-32 rounded-full object-cover border"
             />
           ) : (
-            <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-xl">
+            <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-xl">
               {user.first_name?.[0] || "U"}
             </div>
           )}
         </div>
 
-        {/* User Info */}
-        <div className="flex-1 w-full">
+        {/* Info */}
+        <div className="flex-1">
           {!editing ? (
-            <div className="space-y-2 text-gray-700">
-              <p>
-                <span className="font-semibold">Ism:</span> {user.first_name}
-              </p>
-              <p>
-                <span className="font-semibold">Familiya:</span> {user.last_name}
-              </p>
-              <p>
-                <span className="font-semibold">Email:</span> {user.email}
-              </p>
-              <p>
-                <span className="font-semibold">Telefon:</span> {user.phone || "-"}
-              </p>
-              <p>
-                <span className="font-semibold">Telegram:</span> {user.telegram_username || "-"}
-              </p>
-              {user.bio && (
-                <p>
-                  <span className="font-semibold">Bio:</span> {user.bio}
-                </p>
-              )}
+            <div className="space-y-2">
+              <p><b>Ism:</b> {user.first_name}</p>
+              <p><b>Familiya:</b> {user.last_name}</p>
+              <p><b>Email:</b> {user.email}</p>
+              <p><b>Telefon:</b> {user.phone || "-"}</p>
+              <p><b>Telegram:</b> {user.telegram_username || "-"}</p>
+              {user.bio && <p><b>Bio:</b> {user.bio}</p>}
             </div>
           ) : (
-            <form onSubmit={handleUpdate} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  name="first_name"
-                  value={form.first_name}
-                  onChange={handleChange}
-                  placeholder="Ism"
-                  className="mt-1 w-full rounded-lg border p-2"
-                />
-                <input
-                  type="text"
-                  name="last_name"
-                  value={form.last_name}
-                  onChange={handleChange}
-                  placeholder="Familiya"
-                  className="mt-1 w-full rounded-lg border p-2"
-                />
-                <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  placeholder="Email"
-                  className="mt-1 w-full rounded-lg border p-2"
-                />
-                <input
-                  type="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="Parol (yangilash uchun)"
-                  className="mt-1 w-full rounded-lg border p-2"
-                />
-                <input
-                  type="text"
-                  name="phone"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder="Telefon"
-                  className="mt-1 w-full rounded-lg border p-2"
-                />
-                <input
-                  type="text"
-                  name="telegram_username"
-                  value={form.telegram_username}
-                  onChange={handleChange}
-                  placeholder="Telegram username"
-                  className="mt-1 w-full rounded-lg border p-2"
-                />
-                <select
-                  name="gender"
-                  value={form.gender}
-                  onChange={handleChange}
-                  className="mt-1 w-full rounded-lg border p-2"
-                >
-                  <option value="">Jinsni tanlang</option>
-                  <option value="male">Erkak</option>
-                  <option value="female">Ayol</option>
-                </select>
-                <input
-                  type="text"
-                  name="avatar_url"
-                  value={form.avatar_url}
-                  onChange={handleChange}
-                  placeholder="Avatar URL"
-                  className="mt-1 w-full rounded-lg border p-2"
-                />
-              </div>
-              <textarea
-                name="bio"
-                value={form.bio}
-                onChange={handleChange}
-                placeholder="Bio"
-                className="mt-1 w-full rounded-lg border p-2"
-                rows="3"
-              ></textarea>
+            <form onSubmit={handleUpdate} className="space-y-3">
+              <input name="first_name" value={form.first_name} onChange={handleChange} className="border p-2 w-full" placeholder="Ism" />
+              <input name="last_name" value={form.last_name} onChange={handleChange} className="border p-2 w-full" placeholder="Familiya" />
+              <input name="email" value={form.email} onChange={handleChange} className="border p-2 w-full" placeholder="Email" />
+              <input name="password" value={form.password} onChange={handleChange} className="border p-2 w-full" placeholder="Yangi parol" />
+              <textarea name="bio" value={form.bio} onChange={handleChange} className="border p-2 w-full" placeholder="Bio" />
 
               {message && <p className="text-green-600">{message}</p>}
 
-              <div className="flex gap-4 mt-2">
-                <button
-                  type="submit"
-                  disabled={updating}
-                  className="flex-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
-                >
-                  {updating ? "Yangilanmoqda..." : "Saqlash"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditing(false)}
-                  className="flex-1 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
-                >
-                  Bekor qilish
-                </button>
-              </div>
+              <button className="bg-blue-500 text-white px-4 py-2 rounded">
+                Saqlash
+              </button>
             </form>
           )}
 
           {!editing && (
             <button
               onClick={() => setEditing(true)}
-              className="mt-4 py-2 px-4 mx-5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+              className="mt-4 bg-green-500 text-white px-4 py-2 rounded"
             >
               Yangilash
             </button>
           )}
+
           <button
             onClick={() => {
               localStorage.removeItem("token");
               navigate("/login");
             }}
-            className="mt-2 py-2 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+            className="ml-3 bg-red-500 text-white px-4 py-2 rounded"
           >
             Chiqish
           </button>
         </div>
+      </div>
+
+      {/* ================== MY BOOKS ================== */}
+      <div className="mt-12">
+        <h2 className="text-2xl font-semibold mb-4">📚 Mening kitoblarim</h2>
+
+        {listingsLoading ? (
+          <p>Yuklanmoqda...</p>
+        ) : myListings.length === 0 ? (
+          <p className="text-gray-500">Siz hali kitob joylamagansiz.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {myListings.map((book) => (
+              <div
+                key={book.id}
+                className="border rounded-xl p-4 hover:shadow-md transition"
+              >
+                {book.images?.[0] && (
+                  <img
+                    src={book.images[0]}
+                    alt={book.title}
+                    className="h-40 w-full object-cover rounded mb-3"
+                  />
+                )}
+
+                <h3 className="font-semibold">{book.title}</h3>
+                <p className="text-sm text-gray-600 line-clamp-2">
+                  {book.description}
+                </p>
+
+                <div className="flex justify-between mt-2">
+                  <span className="font-bold text-blue-600">
+                    {book.price} so‘m
+                  </span>
+                  <span className="text-xs bg-gray-200 px-2 py-1 rounded">
+                    {book.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
